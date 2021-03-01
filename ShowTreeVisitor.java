@@ -91,8 +91,8 @@ public class ShowTreeVisitor implements AbsynVisitor {
 
   @Override
   public void visit(SimpleVar exp, int level) {
-      indent( level );
-      System.out.println( "SimpleVar: " + exp.name );
+    // TODO Auto-generated method stub
+    
   }
 
   @Override
