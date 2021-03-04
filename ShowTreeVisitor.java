@@ -114,9 +114,24 @@ public class ShowTreeVisitor implements AbsynVisitor {
   }
 
   @Override
-  public void visit(CallExp exp, int level) {
-    // TODO Auto-generated method stub
+  public void visit(IndexVar exp, int level) {
+    indent(level);
+    level++;
+    System.out.println( "IndexVar: ");
+    exp.index.accept(this, level);
+  }
 
+  @Override
+  public void visit(CallExp exp, int level) {
+    indent(level);
+    System.out.println( "CallExp: " + exp.func);
+    level++;
+    ExpList ex = (ExpList) exp.args;
+    while( ex != null ) {
+      ex.head.accept( this, level );
+      ex = ex.tail;
+    } 
+  
   }
 
   @Override
@@ -133,12 +148,6 @@ public class ShowTreeVisitor implements AbsynVisitor {
 
   @Override
   public void visit(NameTy exp, int level) {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void visit(IndexVar exp, int level) {
     // TODO Auto-generated method stub
 
   }

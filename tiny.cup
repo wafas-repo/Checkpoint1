@@ -97,8 +97,8 @@ precedence left  ELSE;
    
 start with program1;  
 
-program1	     ::=  stmt:s
-                   {: RESULT = s; :}
+program1	     ::=  exp:e
+                   {: RESULT = e; :}
                 ;
 
 program	     ::=  dec_list
@@ -194,19 +194,30 @@ exp            ::= var:v EQ exp:e
 var            ::= ID:i
                    {: RESULT = new SimpleVar(ileft, i); :}
                  | ID:i LBRACK exp:e RBRACK
-
+                   {: RESULT = new IndexVar(ileft, i, e); :}
                  ;    
 
 factor         ::= LPAREN exp:e RPAREN
                    {: RESULT = e; :}
                  | var:v
                    {: RESULT = new VarExp(vleft, v); :}
-                 | ID LPAREN arg_list RPAREN
-                 | ID LPAREN RPAREN
+                 | ID:i LPAREN arg_list:a RPAREN
+                   {: ExpList e = (ExpList) a;
+                      RESULT = new CallExp(ileft, i, e); 
+                   :}
+                 | ID:i LPAREN RPAREN
+                   {: RESULT = new CallExp(ileft, i, null); :}
                  | NUM:n
                    {: RESULT = new IntExp(nleft, nright, n); :}
                  ;
 
-arg_list       ::= arg_list COMMA exp
-                 | exp
+arg_list       ::= arg_list:a COMMA exp:e
+                   {: ExpList t = (ExpList) a;
+                      while( t.tail != null )
+                        t = t.tail;
+                      t.tail = new ExpList(e, null);
+                      RESULT = t;  
+                   :}
+                 | exp:e
+                   {: RESULT = new ExpList(e, null); :}
                  ;
