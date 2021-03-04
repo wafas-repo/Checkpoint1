@@ -97,8 +97,8 @@ precedence left  ELSE;
    
 start with program1;  
 
-program1	     ::=  exp:e
-                   {: RESULT = e; :}
+program1	     ::=  stmt:s
+                   {: RESULT = s; :}
                 ;
 
 program	     ::=  dec_list
@@ -141,12 +141,15 @@ stmt_list      ::= stmt_list stmt
                  |
                  ;
 
-stmt           ::= exp SEMI
-                 | SEMI
+stmt           ::= exp:e SEMI
+                   {: RESULT = e; :}
+                 | SEMI:s
+                   {: RESULT = new NilExp(sleft); :}
                  | comp_stmt
                  | selection_stmt
                  | iteration_stmt
-                 | return_stmt
+                 | return_stmt:r 
+                   {: RESULT = r; :}
                  ;
 
 selection_stmt ::= IF LPAREN exp RPAREN stmt
@@ -156,8 +159,10 @@ selection_stmt ::= IF LPAREN exp RPAREN stmt
 iteration_stmt ::= WHILE LPAREN exp RPAREN stmt
                  ;
 
-return_stmt    ::= RETURN exp SEMI
-                 | RETURN SEMI
+return_stmt    ::= RETURN:r exp:e SEMI
+                   {: RESULT = new ReturnExp(rleft, e); :}
+                 | RETURN:r SEMI
+                   {: RESULT = new ReturnExp(rleft, null); :}
                  ;
 
 exp            ::= var:v EQ exp:e
