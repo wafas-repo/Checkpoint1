@@ -100,8 +100,17 @@ public class ShowTreeVisitor implements AbsynVisitor {
 
   @Override
   public void visit(NilExp exp, int level) {
-    // TODO Auto-generated method stub
+    indent(level);
+    System.out.println( "NilExp: " );
+    
+  }
 
+  @Override
+  public void visit(ReturnExp exp, int level) {
+    indent(level);
+    System.out.println( "ReturnExp: ");
+    level++;
+    exp.exp.accept(this, level);
   }
 
   @Override
@@ -112,12 +121,6 @@ public class ShowTreeVisitor implements AbsynVisitor {
 
   @Override
   public void visit(WhileExp exp, int level) {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void visit(ReturnExp exp, int level) {
     // TODO Auto-generated method stub
 
   }
