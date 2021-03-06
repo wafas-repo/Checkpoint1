@@ -78,14 +78,16 @@ terminal COMMA, LPAREN, RPAREN, LBRACK, RBRACK, LBRACE, RBRACE, SEMI;
 terminal String ID, NUM;
 terminal ERROR;
 
-non terminal program1;  
-non terminal Exp exp, factor; 
+non terminal program;  
+non terminal Exp exp, factor, stmt, return_stmt, selection_stmt, iteration_stmt;
+non terminal ExpList arg_list, stmt_list; 
+non terminal CompoundExp comp_stmt;
 non terminal Var var;
-non terminal program, dec_list;
-non terminal var_dec, fun_dec, type_specifier, loc_dec;
-non terminal stmt, comp_stmt, stmt_list, selection_stmt, iteration_stmt, return_stmt;
-non terminal arg_list;
-non terminal param_list, param;
+non terminal VarDecList loc_dec, param_list;
+non terminal VarDec var_dec, param;
+non terminal NameTy type_specifier;
+non terminal Dec fun_dec;
+non terminal DecList dec_list;
 
 precedence nonassoc LT, GT, EQ, COMPARE, NEQ, LTE, GTE;
 precedence left PLUS, MINUS;
@@ -95,74 +97,123 @@ precedence left  ELSE;
 
 /* ----------------------------Grammar Section-------------------- */
    
-start with program1;  
+start with program;  
 
-program1	     ::=  exp:e
-                   {: RESULT = e; :}
+program	     ::=  dec_list:e
+                  {: RESULT = e; :}
                 ;
 
-program	     ::=  dec_list
-                ;
-
-dec_list      ::=  dec_list var_dec
-                | dec_list fun_dec
-                | var_dec
-                | fun_dec
+dec_list      ::= dec_list:dec var_dec:vd
+                  {: DecList d = dec;
+                     while(d.tail != null)
+                       d = d.tail;
+                     d.tail = new DecList(vd, null);
+                     RESULT = dec; 
+                  :}
+                | dec_list:dl fun_dec:fd
+                  {: DecList d = dl;
+                     while(d.tail != null)
+                       d = d.tail;
+                     d.tail = new DecList(fd, null);
+                     RESULT = dl; 
+                  :}
+                | var_dec:v
+                  {: RESULT = new DecList(v, null); :}
+                | fun_dec:f
+                  {: RESULT = new DecList(f, null); :}
                 ; 
 
-var_dec       ::= type_specifier ID SEMI
-                | type_specifier ID LBRACK NUM RBRACK SEMI
+var_dec       ::= type_specifier:t ID:i SEMI
+                 {:RESULT = new SimpleDec(tleft, t, i); :}
+                | type_specifier:t ID:i LBRACK NUM:n RBRACK SEMI
+                 {:RESULT = new ArrayDec(tleft, t, i, new IntExp(nleft, nright, n)); :}
                 ;
 
-type_specifier ::= INT
-                 | VOID
+type_specifier ::= INT:i
+                   {: RESULT = new NameTy(ileft, NameTy.INT); :}
+                 | VOID:v
+                   {: RESULT = new NameTy(vleft, NameTy.VOID); :}
                  ;
 
-fun_dec        ::= type_specifier ID LPAREN param_list RPAREN comp_stmt
-                 | type_specifier ID LPAREN VOID RPAREN comp_stmt
+fun_dec        ::= type_specifier:t ID:i LPAREN param_list:pl RPAREN comp_stmt:c
+                   {: RESULT = new FunctionDec(tleft, t, i, pl, c); :}
+                 | type_specifier:t ID:i LPAREN VOID RPAREN comp_stmt:c
+                   {: RESULT = new FunctionDec(tleft, t, i, null, c); :}
                  ;
 
-param_list     ::= param_list COMMA param 
-                 | param
+param_list     ::= param_list:pl COMMA param:p
+                  {: VarDecList v = pl;
+                     while(v.tail != null)
+                       v = v.tail;
+                     v.tail = new VarDecList(p, null);
+                     RESULT = pl;   
+                  :}
+                 | param:z
+                   {: RESULT = new VarDecList(z, null); :}
                  ;
 
-param          ::= type_specifier ID
-                 | type_specifier ID LBRACK RBRACK
+param          ::= type_specifier:t ID:i
+                   {: RESULT = new SimpleDec(tleft, t, i); :}
+                 | type_specifier:t ID:i LBRACK RBRACK
+                   {: RESULT = new ArrayDec(tleft, t, i, null); :}
                  ;
 
-comp_stmt     ::= LBRACE loc_dec  stmt_list RBRACE
+comp_stmt     ::= LBRACE:l loc_dec:d  stmt_list:s RBRACE
+                  {: RESULT = new CompoundExp(lleft, d, s); :}
                  ;
 
-loc_dec        ::= loc_dec var_dec
+loc_dec        ::= loc_dec:ld var_dec:vd
+                  {: VarDecList v = ld;
+                     while(v.tail != null)
+                       v = v.tail;
+                       System.out.println(v);
+                     v.tail = new VarDecList(vd, null);
+                     RESULT = ld;   
+                  :}
+                 | 
+                  {: RESULT = new VarDecList(null, null); :}
+                 ;
+
+stmt_list      ::= stmt_list:sl stmt:s
+                   {: ExpList t = sl;
+                      while( t.tail != null )
+                        t = t.tail;
+                        System.out.println(t);
+                      t.tail = new ExpList(s, null);
+                      RESULT = sl;  
+                  :}
                  |
-                 ;
-
-stmt_list      ::= stmt_list stmt
-                 |
+                   {: RESULT = new ExpList(null, null); :}
                  ;
 
 stmt           ::= exp:e SEMI
                    {: RESULT = e; :}
                  | SEMI:s
                    {: RESULT = new NilExp(sleft); :}
-                 | comp_stmt
-                 | selection_stmt
-                 | iteration_stmt
+                 | comp_stmt:c
+                   {: RESULT = c; :}
+                 | selection_stmt:s
+                   {: RESULT = s; :}
+                 | iteration_stmt:i
+                   {: RESULT = i; :}
                  | return_stmt:r 
                    {: RESULT = r; :}
                  ;
 
-selection_stmt ::= IF LPAREN exp RPAREN stmt
-                 | IF LPAREN exp RPAREN stmt ELSE stmt
+selection_stmt ::= IF:i LPAREN exp:e RPAREN stmt:s
+                   {: RESULT = new IfExp(ileft, e, s, null); :}
+                 | IF:i LPAREN exp:e RPAREN stmt:s ELSE stmt:s2
+                   {: RESULT = new IfExp(ileft, e, s, s2); :}
                  ;
 
-iteration_stmt ::= WHILE LPAREN exp RPAREN stmt
+iteration_stmt ::= WHILE:w LPAREN exp:e RPAREN stmt:s
+                   {: RESULT = new WhileExp(wleft, e, s); :}
                  ;
 
 return_stmt    ::= RETURN:r exp:e SEMI
                    {: RESULT = new ReturnExp(rleft, e); :}
                  | RETURN:r SEMI
-                   {: RESULT = new ReturnExp(rleft, null); :}
+                   {: RESULT = new ReturnExp(rleft, new NilExp(rleft)); :}
                  ;
 
 exp            ::= var:v EQ exp:e
@@ -202,9 +253,7 @@ factor         ::= LPAREN exp:e RPAREN
                  | var:v
                    {: RESULT = new VarExp(vleft, v); :}
                  | ID:i LPAREN arg_list:a RPAREN
-                   {: ExpList e = (ExpList) a;
-                      RESULT = new CallExp(ileft, i, e); 
-                   :}
+                   {: RESULT = new CallExp(ileft, i, a); :}
                  | ID:i LPAREN RPAREN
                    {: RESULT = new CallExp(ileft, i, null); :}
                  | NUM:n
@@ -212,11 +261,11 @@ factor         ::= LPAREN exp:e RPAREN
                  ;
 
 arg_list       ::= arg_list:a COMMA exp:e
-                   {: ExpList t = (ExpList) a;
+                   {: ExpList t = a;
                       while( t.tail != null )
                         t = t.tail;
                       t.tail = new ExpList(e, null);
-                      RESULT = t;  
+                      RESULT = a;  
                    :}
                  | exp:e
                    {: RESULT = new ExpList(e, null); :}

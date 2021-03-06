@@ -1,7 +1,8 @@
-/* A program to compute the factorial value of an input */
+/* A program to compute the f42484894u29
+ factorial value of an input */
 
 void main(void) {
-  int x; int fac;
+  int x; int fac; /* hello */
   x = input();
   fac = 1;
 
