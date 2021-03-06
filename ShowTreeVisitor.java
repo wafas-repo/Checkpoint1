@@ -10,8 +10,10 @@ public class ShowTreeVisitor implements AbsynVisitor {
 
   public void visit( ExpList expList, int level ) {
     while( expList != null ) {
-      expList.head.accept( this, level );
-      expList = expList.tail;
+      if (expList.head != null){
+        expList.head.accept( this, level );
+        expList = expList.tail;
+      }  
     } 
   }
 
@@ -126,60 +128,110 @@ public class ShowTreeVisitor implements AbsynVisitor {
     indent(level);
     System.out.println( "CallExp: " + exp.func);
     level++;
-    ExpList ex = (ExpList) exp.args;
+    ExpList ex = exp.args;
     while( ex != null ) {
       ex.head.accept( this, level );
       ex = ex.tail;
     } 
-  
   }
 
   @Override
   public void visit(WhileExp exp, int level) {
-    // TODO Auto-generated method stub
-
+    indent(level);
+    System.out.println( "WhileExp:" );
+    level++;
+    exp.test.accept( this, level );
+    exp.body.accept( this, level ); 
   }
 
   @Override
   public void visit(CompoundExp exp, int level) {
-    // TODO Auto-generated method stub
-
+     indent(level);
+     System.out.println("CompoundExp: " );
+     level++;
+     VarDecList dec = exp.decs;
+     while( dec != null ) {
+      if(dec.head != null) {
+        dec.head.accept( this, level );
+      }
+        dec = dec.tail;
+     } 
+     ExpList ex = exp.exps;
+     while( ex != null ) {
+        if(ex.head != null) {
+          ex.head.accept( this, level );
+        }
+        ex = ex.tail;
+     } 
   }
 
   @Override
   public void visit(NameTy exp, int level) {
-    // TODO Auto-generated method stub
-
+    indent(level);
+    if (exp.typ == 0) { 
+      System.out.println("NameTy: INT");
+    } else if (exp.typ == 1) {
+      System.out.println("NameTy: VOID");
+    }
   }
 
   @Override
   public void visit(FunctionDec exp, int level) {
-    // TODO Auto-generated method stub
-
+    indent(level);
+    System.out.println( "FunctionDec:" );
+    level++;
+    exp.result.accept(this, level);
+    indent(level);
+    System.out.println("ID: " + exp.func);
+    VarDecList ex = exp.params;
+    while( ex != null ) {
+      ex.head.accept( this, level );
+      ex = ex.tail;
+    } 
+    exp.body.accept(this, level);
   }
 
   @Override
   public void visit(SimpleDec exp, int level) {
-    // TODO Auto-generated method stub
-
+     indent( level );
+    System.out.println( "SimpleDec:" );
+    level++;
+    exp.typ.accept( this, level );
+    indent(level);
+    System.out.println("ID: " + exp.name);
   }
 
   @Override
   public void visit(ArrayDec exp, int level) {
-    // TODO Auto-generated method stub
-
-  }
+    indent( level );
+    System.out.println( "ArrayDec:" );
+    level++;
+    exp.typ.accept( this, level );
+    indent(level);
+    System.out.println("ID: " + exp.name);  
+    if (exp.size != null) {
+      exp.size.accept( this, level );
+    } 
+    }
 
   @Override
   public void visit(DecList exp, int level) {
-    // TODO Auto-generated method stub
-
+     while( exp != null ) {
+      exp.head.accept( this, level );
+      exp = exp.tail;
+    } 
   }
+  
 
   @Override
-  public void visit(VarDecList exp, int level) {
-    // TODO Auto-generated method stub
+public void visit(VarDecList exp, int level) {
+    while( exp != null ) {
 
+      if (exp.head != null) {
+        exp.head.accept( this, level );
+        exp = exp.tail;
+      }
+    } 
   }
-
 }
+

@@ -88,7 +88,7 @@ number = {digit}+
 letter = [_a-zA-Z]
 identifier = {letter}[_a-zA-Z0-9]*
 
-comment = [\/]+[*]+[\w\W\s\d]*[*]+[\/]+
+comment = "/*"[^*/]*"*/"
    
 %%
 /* ------------------------Lexical Rules Section---------------------- */
