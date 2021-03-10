@@ -6,19 +6,19 @@ CLASSPATH=-cp /Users/wafaqazi/java/java-cup-11b.jar:.
 CUP=$(JAVA) $(CLASSPATH) java_cup.Main
 #CUP=cup
 
-all: Main.class
+all: CM.class
 
-Main.class: absyn/*.java parser.java sym.java Lexer.java ShowTreeVisitor.java Scanner.java Main.java
+CM.class: absyn/*.java parser.java sym.java Lexer.java ShowTreeVisitor.java Scanner.java CM.java
 
 %.class: %.java
 	$(JAVAC) $(CLASSPATH) $^
 
-Lexer.java: tiny.flex
-	$(JFLEX) tiny.flex
+Lexer.java: CM.flex
+	$(JFLEX) CM.flex
 
-parser.java: tiny.cup
-	#$(CUP) -dump -expect 3 tiny.cup
-	$(CUP) -expect 3 tiny.cup
+parser.java: CM.cup
+	#$(CUP) -dump -expect 3 CM.cup
+	$(CUP) -expect 3 CM.cup
 
 clean:
 	rm -f parser.java Lexer.java sym.java *.class absyn/*.class *~

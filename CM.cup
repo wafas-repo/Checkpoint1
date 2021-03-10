@@ -121,12 +121,20 @@ dec_list      ::= dec_list:dec var_dec:vd
                   {: RESULT = new DecList(v, null); :}
                 | fun_dec:f
                   {: RESULT = new DecList(f, null); :}
+                | error:e
+                   {:
+                    parser.report_error("Syntax error in Declaration List", e);
+                    RESULT = null;
+                  :}
                 ; 
 
 var_dec       ::= type_specifier:t ID:i SEMI
                  {:RESULT = new SimpleDec(tleft, t, i); :}
                 | type_specifier:t ID:i LBRACK NUM:n RBRACK SEMI
                  {:RESULT = new ArrayDec(tleft, t, i, new IntExp(nleft, nright, n)); :}
+                | type_specifier:t error:e SEMI
+                  {: parser.report_error("Invalid syntax in variable declaration", e);
+                   RESULT = null; :}
                 ;
 
 type_specifier ::= INT:i
@@ -139,6 +147,9 @@ fun_dec        ::= type_specifier:t ID:i LPAREN param_list:pl RPAREN comp_stmt:c
                    {: RESULT = new FunctionDec(tleft, t, i, pl, c); :}
                  | type_specifier:t ID:i LPAREN VOID RPAREN comp_stmt:c
                    {: RESULT = new FunctionDec(tleft, t, i, null, c); :}
+                 | type_specifier:t ID:i LPAREN param_list:pl RPAREN error:e
+                   {: report_error("Function Declaration error", e);
+                      RESULT = null; :}
                  ;
 
 param_list     ::= param_list:pl COMMA param:p
@@ -150,6 +161,11 @@ param_list     ::= param_list:pl COMMA param:p
                   :}
                  | param:z
                    {: RESULT = new VarDecList(z, null); :}
+                 | error:e
+                   {:
+                    parser.report_error("Syntax error in parameters of function declaration", e);
+                    RESULT = null;
+                  :}
                  ;
 
 param          ::= type_specifier:t ID:i
@@ -166,7 +182,7 @@ loc_dec        ::= loc_dec:ld var_dec:vd
                   {: VarDecList v = ld;
                      while(v.tail != null)
                        v = v.tail;
-                       System.out.println(v);
+
                      v.tail = new VarDecList(vd, null);
                      RESULT = ld;   
                   :}
@@ -178,7 +194,6 @@ stmt_list      ::= stmt_list:sl stmt:s
                    {: ExpList t = sl;
                       while( t.tail != null )
                         t = t.tail;
-                        System.out.println(t);
                       t.tail = new ExpList(s, null);
                       RESULT = sl;  
                   :}
@@ -240,6 +255,9 @@ exp            ::= var:v EQ exp:e
                    {: RESULT = new OpExp(s1left, s1right, s1, OpExp.OVER, s2); :} 
                  | factor:f
                    {: RESULT = f; :}
+                 | error:e
+                   {: parser.report_error("Syntax error in expression statement", e);
+                   RESULT = new NilExp(eleft); :}
                  ;
 
 var            ::= ID:i
