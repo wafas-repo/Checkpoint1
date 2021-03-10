@@ -29,11 +29,11 @@ machine.  For example, the given settings are for the Linux server and the
 commented settings are for my macbook.
 
   To build the parser, type "make" in the current directory, which will 
-generate an executable program called "Main".
+generate an executable program called "CM".
 
   To test source code like "fac.cm", type 
 
-    "java -classpath /usr/share/java/cup.jar:. Main fac.cm" 
+    "java -classpath /usr/share/java/cup.jar:. CM fac.cm" 
 
 and the syntax tree will be displayed on the screen.
 
