@@ -1,13 +1,11 @@
-Wafa Qazi / Aqsa Pehlvi
-CIS*4650
-Checkpoint 1
+Wafa Qazi
 March 7, 2021
 
 ===================
 PROGRAM DESCRIPTION
 ===================
 
-For CheckpointOne, the following was implemented: 
+the following was implemented: 
       • Scanner that generates a sequence of relevant tokens
       • Parser that generates and showsan abstract syntax tree
       • Error Recovery that reports errors and continues the parsing process
@@ -52,15 +50,6 @@ Testing
   This parser is meant to take C- programs as input files. We have provided
   [12345].cm files to test with, however any C- program files will work. 
 
-===========================
-ASSUMPTIONS AND LIMITATIONS
-===========================
-
- 1. Assume testing will be with errors of scope relaated to assignment
- 2. This program will work with any files of C- spec
- 3. This program does not have extensive error handling and will give
-    a null pointer exception when presented with most syntactical or 
-    lexical errors.
 
 ====================
 FURTHER IMPROVEMENTS
